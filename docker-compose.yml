@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - SECRET_KEY=academic-super-secure-production-key-2026
+      - DATABASE_URL=sqlite:///./continuous_auth.db
+    volumes:
+      - app_data:/app/app/storage/models
+
+volumes:
+  app_data:

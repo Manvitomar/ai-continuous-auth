@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: ai-continuous-auth
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite:///./continuous_auth.db
