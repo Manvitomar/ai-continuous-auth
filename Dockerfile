@@ -40,4 +40,4 @@ RUN mkdir -p /app/app/storage/models
 EXPOSE 8000
 
 # Start server dynamically respecting cloud provider $PORT
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-${port:-10000}}"]
