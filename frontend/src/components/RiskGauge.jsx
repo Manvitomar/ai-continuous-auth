@@ -14,24 +14,24 @@ export const RiskGauge = ({ riskScore = 5.0, rawAnomalyScore = 0.20, riskStatus 
   const statusInfo = getColor();
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col items-center justify-between relative overflow-hidden">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col items-center justify-between relative overflow-hidden">
       {/* Background glow based on risk */}
       <div
         className="absolute -top-12 -left-12 w-48 h-48 rounded-full blur-3xl opacity-15 pointer-events-none transition-all duration-700"
         style={{ backgroundColor: statusInfo.stroke }}
       />
 
-      <div className="w-full flex items-center justify-between mb-2">
-        <h3 className="font-semibold text-sm text-slate-300 uppercase tracking-wider">
+      <div className="w-full flex items-center justify-between mb-2 gap-2">
+        <h3 className="font-semibold text-xs sm:text-sm text-slate-300 uppercase tracking-wider truncate">
           Continuous Risk Engine
         </h3>
-        <span className={`text-xs font-bold px-2.5 py-1 rounded-full border border-current/20 ${statusInfo.bg}`}>
+        <span className={`text-[10px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-current/20 whitespace-nowrap ${statusInfo.bg}`}>
           {statusInfo.label}
         </span>
       </div>
 
       {/* SVG Semi-Circle Speedometer */}
-      <div className="relative w-64 h-36 flex items-center justify-center my-2">
+      <div className="relative w-full max-w-[260px] h-36 flex items-center justify-center my-2">
         <svg viewBox="0 0 200 110" className="w-full h-full">
           {/* Background Arc */}
           <path

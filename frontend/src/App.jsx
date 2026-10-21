@@ -46,7 +46,7 @@ export const App = () => {
         onOpenMFA={() => setIsMFAOpen(true)}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 py-5 sm:p-6 md:p-8">
         {currentTab === 'dashboard' ? (
           <DashboardPage
             onOpenEnrollment={() => setIsEnrollmentOpen(true)}

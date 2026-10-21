@@ -132,24 +132,24 @@ export const EnrollmentModal = ({ isOpen, onClose, onEnrollmentComplete }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-8 shadow-2xl relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-4 sm:p-8 shadow-2xl relative overflow-hidden max-h-[92vh] overflow-y-auto">
         {/* Glow */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Header */}
-        <div className="flex items-center justify-between pb-6 border-b border-slate-800 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-400">
-              <ShieldCheck className="w-6 h-6" />
+        <div className="flex items-center justify-between pb-4 sm:pb-6 border-b border-slate-800 mb-4 sm:mb-6">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="p-2 sm:p-2.5 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-400 flex-shrink-0">
+              <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-100">Behavioral Biometrics Enrollment</h2>
+              <h2 className="text-base sm:text-lg font-bold text-slate-100">Behavioral Biometrics Enrollment</h2>
               <p className="text-xs text-slate-400">Step {step} of 4: Calibrate Baseline Profile</p>
             </div>
           </div>
           {step !== 4 && (
-            <button onClick={onClose} className="text-slate-500 hover:text-slate-300 text-sm">
+            <button onClick={onClose} className="text-slate-500 hover:text-slate-300 text-base sm:text-sm p-1">
               &times;
             </button>
           )}
@@ -251,16 +251,16 @@ export const EnrollmentModal = ({ isOpen, onClose, onEnrollmentComplete }) => {
             </p>
 
             {/* Target Canvas Grid */}
-            <div className="relative h-48 bg-slate-950 rounded-2xl border border-slate-800 p-4 overflow-hidden flex items-center justify-center">
+            <div className="relative h-44 sm:h-48 bg-slate-950 rounded-2xl border border-slate-800 p-2 sm:p-4 overflow-hidden flex items-center justify-center">
               {[0, 1, 2, 3, 4, 5].map((idx) => {
                 const isActive = mouseTargetsHit === idx;
                 const positions = [
-                  'top-6 left-8',
-                  'top-6 right-8',
-                  'bottom-6 left-12',
-                  'bottom-6 right-12',
-                  'top-1/2 left-1/3 -translate-y-1/2',
-                  'top-1/2 right-1/3 -translate-y-1/2'
+                  'top-3 left-3 sm:top-6 sm:left-8',
+                  'top-3 right-3 sm:top-6 sm:right-8',
+                  'bottom-3 left-3 sm:bottom-6 sm:left-12',
+                  'bottom-3 right-3 sm:bottom-6 sm:right-12',
+                  'top-1/2 left-3 sm:left-1/3 -translate-y-1/2',
+                  'top-1/2 right-3 sm:right-1/3 -translate-y-1/2'
                 ];
 
                 if (!isActive) return null;
@@ -269,7 +269,7 @@ export const EnrollmentModal = ({ isOpen, onClose, onEnrollmentComplete }) => {
                   <button
                     key={idx}
                     onClick={() => handleTargetClick(idx)}
-                    className={`absolute ${positions[idx]} px-4 py-2.5 rounded-xl font-bold text-xs shadow-lg transition-all transform hover:scale-105 bg-emerald-500 text-white animate-pulse`}
+                    className={`absolute ${positions[idx]} px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-[11px] sm:text-xs shadow-lg transition-all transform hover:scale-105 bg-emerald-500 text-white animate-pulse whitespace-nowrap`}
                   >
                     Target #{idx + 1} (Click Me)
                   </button>

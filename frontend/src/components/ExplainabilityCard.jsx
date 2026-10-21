@@ -3,16 +3,16 @@ import { HelpCircle, ArrowUpRight, ArrowDownRight, CheckCircle2, AlertOctagon } 
 
 export const ExplainabilityCard = ({ explanations = [] }) => {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 gap-2">
           <div className="flex items-center gap-2">
-            <HelpCircle className="w-5 h-5 text-emerald-400" />
-            <h3 className="font-semibold text-sm text-slate-200">
+            <HelpCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            <h3 className="font-semibold text-xs sm:text-sm text-slate-200">
               Biometric Anomaly Attributions
             </h3>
           </div>
-          <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+          <span className="text-[9px] sm:text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 whitespace-nowrap">
             Z-Score Decomposition
           </span>
         </div>
@@ -59,7 +59,7 @@ export const ExplainabilityCard = ({ explanations = [] }) => {
                     {exp.description}
                   </p>
 
-                  <div className="flex items-center gap-3 mt-1.5 text-[10px] font-mono text-slate-500">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1.5 text-[10px] font-mono text-slate-500">
                     <span>Observed: <strong className="text-slate-300">{exp.observed_value}</strong></span>
                     <span>Enrolled Mean: <strong className="text-slate-300">{exp.baseline_mean}</strong></span>
                   </div>
@@ -67,14 +67,14 @@ export const ExplainabilityCard = ({ explanations = [] }) => {
               );
             })
           ) : (
-            <div className="p-8 text-center text-xs text-slate-500">
+            <div className="p-6 sm:p-8 text-center text-xs text-slate-500">
               Interaction dynamics are fully aligned with baseline profile. No anomalous deviations detected.
             </div>
           )}
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-800/80 text-[10px] text-slate-500 flex items-center justify-between">
+      <div className="mt-4 pt-3 border-t border-slate-800/80 text-[10px] text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
         <span>Zero-Content Guarantee: Features are pure dynamics</span>
         <span>Standard Normal: &plusmn;1.96 &sigma; (95% CI)</span>
       </div>

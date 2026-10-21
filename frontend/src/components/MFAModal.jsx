@@ -93,17 +93,17 @@ export const MFAModal = ({ isOpen, onClose, isChallengedMode = false }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl relative overflow-hidden max-h-[92vh] overflow-y-auto">
         {/* Glow */}
         <div className={`absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl pointer-events-none ${
           isChallengedMode ? 'bg-red-500/15' : 'bg-emerald-500/15'
         }`} />
 
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-5">
-          <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-2xl border ${
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-800 mb-4 sm:mb-5">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className={`p-2 sm:p-2.5 rounded-2xl border flex-shrink-0 ${
               isChallengedMode
                 ? 'bg-red-500/10 border-red-500/20 text-red-400'
                 : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
@@ -111,16 +111,16 @@ export const MFAModal = ({ isOpen, onClose, isChallengedMode = false }) => {
               {isChallengedMode ? <Lock className="w-5 h-5 animate-bounce" /> : <KeyRound className="w-5 h-5" />}
             </div>
             <div>
-              <h3 className="font-bold text-sm text-slate-100">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-100">
                 {isChallengedMode ? 'Security Anomaly Lockdown' : 'TOTP Multi-Factor Authentication'}
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-[11px] sm:text-xs text-slate-400">
                 {isChallengedMode ? `Risk Score Breached ${currentRiskScore}%` : 'RFC 6238 Time-Based OTP'}
               </p>
             </div>
           </div>
           {!isChallengedMode && (
-            <button onClick={onClose} className="text-slate-500 hover:text-slate-300 text-lg">
+            <button onClick={onClose} className="text-slate-500 hover:text-slate-300 text-base sm:text-lg p-1">
               &times;
             </button>
           )}
@@ -147,11 +147,11 @@ export const MFAModal = ({ isOpen, onClose, isChallengedMode = false }) => {
               Scan this QR code with <strong>Google Authenticator</strong>, <strong>Authy</strong>, or any TOTP app:
             </p>
 
-            <div className="flex flex-col items-center justify-center p-3 bg-white rounded-2xl shadow-inner">
+            <div className="flex flex-col items-center justify-center p-2.5 sm:p-3 bg-white rounded-2xl shadow-inner">
               <img
                 src={setupData.qr_code_base64}
                 alt="TOTP QR Code"
-                className="w-44 h-44 object-contain"
+                className="w-36 h-36 sm:w-44 sm:h-44 object-contain"
               />
             </div>
 
