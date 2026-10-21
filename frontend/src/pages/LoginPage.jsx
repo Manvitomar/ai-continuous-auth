@@ -11,7 +11,9 @@ export const LoginPage = ({ onSwitchToRegister }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
+    const cleanUsername = username.trim();
+
+    if (!cleanUsername || !password) {
       setErrorMsg('Please enter both username and password.');
       return;
     }
@@ -20,9 +22,16 @@ export const LoginPage = ({ onSwitchToRegister }) => {
     setErrorMsg('');
 
     try {
-      await login(username, password);
+      await login(cleanUsername, password);
     } catch (err) {
-      setErrorMsg(err.response?.data?.detail || 'Invalid login credentials. Please try again.');
+      const detail = err.response?.data?.detail;
+      if (typeof detail === 'string') {
+        setErrorMsg(detail);
+      } else if (Array.isArray(detail) && detail.length > 0) {
+        setErrorMsg(detail[0].msg || 'Validation failed. Please verify your credentials.');
+      } else {
+        setErrorMsg('Invalid login credentials. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -34,21 +43,47 @@ export const LoginPage = ({ onSwitchToRegister }) => {
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10">
+        {/* Top Segmented Mode Switcher */}
+        <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 mb-6">
+          <button
+            type="button"
+            className="flex-1 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-white shadow-sm"
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={onSwitchToRegister}
+            className="flex-1 py-2 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-slate-200"
+          >
+            Create Account
+          </button>
+        </div>
+
         {/* Logo & Title */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div className="inline-flex p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-400 mb-3 shadow-lg">
             <ShieldCheck className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-100">Welcome Back</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-100">Welcome Back</h2>
           <p className="text-xs text-slate-400 mt-1">
-            AI-Based Continuous Authentication System
+            Sign in to your continuous authentication session
           </p>
         </div>
 
         {errorMsg && (
-          <div className="mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{errorMsg}</span>
+          <div className="mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+            <button
+              type="button"
+              onClick={onSwitchToRegister}
+              className="self-start text-[11px] font-bold text-emerald-400 hover:text-emerald-300 underline"
+            >
+              Don't have an account yet? Create one here &rarr;
+            </button>
           </div>
         )}
 
