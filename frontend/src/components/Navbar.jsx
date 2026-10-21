@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useBiometrics } from '../context/BiometricContext';
-import { ShieldCheck, LogOut, Activity, BarChart3, UserCheck, KeyRound, Menu, X } from 'lucide-react';
+import { ShieldCheck, LogOut, Activity, BarChart3, UserCheck, KeyRound, Menu, X, Volume2, VolumeX } from 'lucide-react';
+import { isSoundEnabled, setSoundEnabled } from '../services/soundEffects';
 
 export const Navbar = ({ currentTab, setCurrentTab, onOpenEnrollment, onOpenMFA }) => {
   const { user, logout } = useAuth();
   const { currentRiskScore, riskStatus } = useBiometrics();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
+
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    setSoundEnabled(next);
+  };
 
   const getStatusBadge = (compact = false) => {
     if (riskStatus === 'LOW') {
@@ -100,6 +108,17 @@ export const Navbar = ({ currentTab, setCurrentTab, onOpenEnrollment, onOpenMFA 
 
           <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
             <button
+              onClick={toggleSound}
+              className={`p-1.5 rounded-lg border transition ${
+                soundOn
+                  ? 'bg-slate-800 border-slate-700 text-emerald-400 hover:text-emerald-300'
+                  : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-400'
+              }`}
+              title={soundOn ? 'Security Audio Alerts: ON' : 'Security Audio Alerts: MUTED'}
+            >
+              {soundOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </button>
+            <button
               onClick={onOpenMFA}
               className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700 whitespace-nowrap"
               title="Configure TOTP MFA"
@@ -180,14 +199,23 @@ export const Navbar = ({ currentTab, setCurrentTab, onOpenEnrollment, onOpenMFA 
             </button>
 
             <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 px-1 text-xs text-slate-400">
-              <span className="truncate max-w-[200px]">User: <strong className="text-slate-200">{user?.username}</strong></span>
-              <button
-                onClick={logout}
-                className="flex items-center gap-1 text-red-400 hover:text-red-300 font-medium py-1 px-2 rounded-lg hover:bg-slate-800"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                Sign Out
-              </button>
+              <span className="truncate max-w-[150px]">User: <strong className="text-slate-200">{user?.username}</strong></span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleSound}
+                  className="flex items-center gap-1 text-slate-300 hover:text-white py-1 px-2 rounded-lg bg-slate-800 border border-slate-700 text-[11px]"
+                >
+                  {soundOn ? <Volume2 className="w-3.5 h-3.5 text-emerald-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
+                  {soundOn ? 'Sound On' : 'Muted'}
+                </button>
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-1 text-red-400 hover:text-red-300 font-medium py-1 px-2 rounded-lg hover:bg-slate-800"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         </div>

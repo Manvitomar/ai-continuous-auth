@@ -6,6 +6,7 @@ import { TelemetryCharts } from '../components/TelemetryCharts';
 import { ExplainabilityCard } from '../components/ExplainabilityCard';
 import { ImpostorSimulator } from '../components/ImpostorSimulator';
 import { GatedActionCard } from '../components/GatedActionCard';
+import { BiometricSandbox } from '../components/BiometricSandbox';
 import { ShieldCheck, UserCheck, AlertTriangle } from 'lucide-react';
 
 export const DashboardPage = ({ onOpenEnrollment, onOpenMFA }) => {
@@ -56,8 +57,9 @@ export const DashboardPage = ({ onOpenEnrollment, onOpenMFA }) => {
         </div>
       </div>
 
-      {/* Middle Row: Explainability Breakdown */}
+      {/* Middle Row: Live Interactive Biometric Sandbox & Explainability Breakdown */}
       <div className="grid grid-cols-1 gap-4 sm:gap-6">
+        <BiometricSandbox />
         <ExplainabilityCard explanations={explanations} />
       </div>
 

@@ -201,13 +201,22 @@ export const MFAModal = ({ isOpen, onClose, isChallengedMode = false }) => {
             </label>
             <input
               type="text"
-              maxLength={8}
+              maxLength={12}
               value={totpCode}
-              onChange={(e) => setTotpCode(e.target.value.replace(/[^a-zA-Z0-9]/g, ''))}
-              placeholder="000000"
+              onChange={(e) => setTotpCode(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''))}
+              placeholder="000000 or BACKUP-CODE"
               autoFocus
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-widest text-slate-100 focus:border-emerald-500 focus:outline-none transition"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-center text-lg sm:text-xl font-mono tracking-widest text-slate-100 focus:border-emerald-500 focus:outline-none transition"
             />
+            <p className="text-[10px] text-slate-500 mt-1.5 text-center">
+              {user?.username === 'demo_researcher' ? (
+                <span className="text-emerald-400 font-semibold">
+                  Presentation Mode: Enter <code className="bg-slate-800 px-1 py-0.5 rounded text-emerald-300">123456</code> or backup code <code className="bg-slate-800 px-1 py-0.5 rounded text-emerald-300">DEMO-1048</code> to unlock.
+                </span>
+              ) : (
+                <span>Authenticator app out of reach? Enter an 8-character backup recovery code.</span>
+              )}
+            </p>
           </div>
 
           <button

@@ -10,7 +10,7 @@ import {
   CartesianGrid,
   ReferenceLine
 } from 'recharts';
-import { BarChart3, Award, CheckCircle2, AlertTriangle, Layers, BookOpen, RefreshCw } from 'lucide-react';
+import { BarChart3, Award, CheckCircle2, AlertTriangle, Layers, BookOpen, RefreshCw, Download, Printer } from 'lucide-react';
 
 export const ModelEvaluationPage = () => {
   const [evaluation, setEvaluation] = useState(null);
@@ -28,6 +28,43 @@ export const ModelEvaluationPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExportCSV = () => {
+    if (!evaluation) return;
+    const { metrics, roc_curve, confusion_matrix } = evaluation;
+    let csv = "Academic Model Evaluation Benchmark Report\n";
+    csv += `Metric,Value\n`;
+    csv += `ROC_AUC,${metrics.roc_auc}\n`;
+    csv += `Accuracy,${metrics.accuracy}\n`;
+    csv += `Precision,${metrics.precision}\n`;
+    csv += `Recall_TPR,${metrics.recall}\n`;
+    csv += `FAR_FalseAcceptanceRate,${metrics.false_acceptance_rate_far}\n`;
+    csv += `FRR_FalseRejectionRate,${metrics.false_rejection_rate_frr}\n\n`;
+
+    csv += `Confusion Matrix\n`;
+    csv += `Actual_Predicted,Predicted_Authentic,Predicted_Anomaly\n`;
+    csv += `Genuine_User,${confusion_matrix.true_positives_genuine_accepted},${confusion_matrix.false_negatives_genuine_blocked}\n`;
+    csv += `Adversary_Impostor,${confusion_matrix.false_positives_impostor_accepted},${confusion_matrix.true_negatives_impostor_blocked}\n\n`;
+
+    csv += `ROC Curve Points\n`;
+    csv += `FPR,TPR\n`;
+    roc_curve.forEach(pt => {
+      csv += `${pt.fpr},${pt.tpr}\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `biometric_model_benchmark_audit_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePrintReport = () => {
+    window.print();
   };
 
   useEffect(() => {
@@ -74,12 +111,28 @@ export const ModelEvaluationPage = () => {
             Empirical validation of Isolation Forest anomaly detector on genuine vs. synthetic adversarial profiles.
           </p>
         </div>
-        <button
-          onClick={fetchEvaluation}
-          className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition border border-slate-700"
-        >
-          <RefreshCw className="w-3.5 h-3.5" /> Refresh Metrics
-        </button>
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <button
+            onClick={handleExportCSV}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition border border-slate-700"
+            title="Download CSV of benchmarks & ROC curve points"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-400" /> Export CSV
+          </button>
+          <button
+            onClick={handlePrintReport}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition border border-slate-700"
+            title="Print or Save as PDF Academic Report"
+          >
+            <Printer className="w-3.5 h-3.5 text-cyan-400" /> Print / PDF
+          </button>
+          <button
+            onClick={fetchEvaluation}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition border border-slate-700"
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards Row */}

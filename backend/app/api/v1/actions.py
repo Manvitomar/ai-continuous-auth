@@ -32,9 +32,10 @@ def execute_sensitive_action(
 
     current_risk = user_session.current_risk_score if user_session else 10.0
     is_mfa_verified = user_session.is_mfa_verified if user_session else False
+    active_threshold = action_in.threshold if action_in.threshold is not None else settings.RISK_HIGH_THRESHOLD
 
     # Security policy enforcement
-    if current_risk > settings.RISK_HIGH_THRESHOLD and not is_mfa_verified:
+    if current_risk > active_threshold and not is_mfa_verified:
         # Action strictly blocked
         audit = AuditLog(
             user_id=current_user.id,

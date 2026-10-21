@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import api from '../services/api';
 import { useAuth } from './AuthContext';
 import { FeatureExtractor } from '../biometrics/featureExtractor';
+import { playRiskAlert, playSuccessChime } from '../services/soundEffects';
 
 const BiometricContext = createContext(null);
 
@@ -88,8 +89,9 @@ export const BiometricProvider = ({ children }) => {
       setRiskStatus(data.risk_status);
       setExplanations(data.explanations || []);
 
-      if (data.is_session_locked || data.is_mfa_required) {
+      if (data.is_session_locked || data.is_mfa_required || data.risk_score > 70) {
         setIsMfaChallenged(true);
+        playRiskAlert();
       }
 
       // Add to running history
@@ -177,6 +179,7 @@ export const BiometricProvider = ({ children }) => {
       session_token: sessionToken
     });
     if (res.data.verified) {
+      playSuccessChime();
       setCurrentRiskScore(res.data.new_risk_score);
       setRiskStatus('LOW');
       setIsMfaChallenged(false);

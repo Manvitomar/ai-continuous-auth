@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useBiometrics } from '../context/BiometricContext';
-import { Landmark, FileSpreadsheet, Lock, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Landmark, FileSpreadsheet, Lock, CheckCircle2, AlertTriangle, ArrowRight, Sliders } from 'lucide-react';
+import { playSuccessChime, playRiskAlert } from '../services/soundEffects';
 
 export const GatedActionCard = ({ onRequireMFA }) => {
   const { sessionToken } = useAuth();
   const { currentRiskScore, riskStatus } = useBiometrics();
 
+  const [threshold, setThreshold] = useState(70);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null); // { type: 'success' | 'error', message, txId }
 
@@ -20,9 +22,11 @@ export const GatedActionCard = ({ onRequireMFA }) => {
         action_type: actionType,
         target,
         amount,
-        session_token: sessionToken
+        session_token: sessionToken,
+        threshold: threshold
       });
 
+      playSuccessChime();
       setResult({
         type: 'success',
         message: res.data.message,
@@ -30,6 +34,7 @@ export const GatedActionCard = ({ onRequireMFA }) => {
         risk: res.data.risk_score_at_execution
       });
     } catch (err) {
+      playRiskAlert();
       const detail = err.response?.data?.detail;
       if (err.response?.status === 403 && detail?.requires_mfa) {
         setResult({
@@ -59,14 +64,45 @@ export const GatedActionCard = ({ onRequireMFA }) => {
             Risk-Gated Sensitive Operations
           </h3>
         </div>
-        <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-          Threshold &gt; 70% Blocked
+        <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${
+          currentRiskScore > threshold 
+            ? 'bg-red-500/10 text-red-400 border-red-500/30' 
+            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+        }`}>
+          Threshold &gt; {threshold}% Blocked
         </span>
       </div>
 
-      <p className="text-xs text-slate-400 mb-5 leading-relaxed">
-        High-value business actions require continuous behavioral verification. If the live anomaly score reaches the danger threshold, operations are automatically locked pending step-up TOTP.
+      <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+        High-value business actions require continuous behavioral verification. If the live anomaly score reaches the configured threshold, operations are automatically locked pending step-up TOTP.
       </p>
+
+      {/* Dynamic Sensitivity Policy Slider */}
+      <div className="bg-slate-950/70 p-3 sm:p-3.5 rounded-xl border border-slate-800 mb-4">
+        <div className="flex items-center justify-between text-xs mb-1.5">
+          <span className="font-semibold text-slate-300 flex items-center gap-1.5">
+            <Sliders className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+            <span>Policy Sensitivity Threshold:</span>
+          </span>
+          <span className="font-mono font-bold px-2 py-0.5 rounded text-[10px] sm:text-[11px] bg-slate-800 text-cyan-300 border border-slate-700">
+            {threshold}% {threshold <= 55 ? '(Strict Bank)' : threshold <= 75 ? '(Balanced)' : '(Low Friction)'}
+          </span>
+        </div>
+        <input
+          type="range"
+          min="40"
+          max="90"
+          step="5"
+          value={threshold}
+          onChange={(e) => setThreshold(Number(e.target.value))}
+          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+        />
+        <div className="flex justify-between text-[9px] text-slate-500 mt-1 font-mono">
+          <span>40% (High Security)</span>
+          <span>70% (Standard)</span>
+          <span>90% (Low Friction)</span>
+        </div>
+      </div>
 
       {/* Action Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">

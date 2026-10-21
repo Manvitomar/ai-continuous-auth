@@ -1,13 +1,26 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Lock, User, ArrowRight, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Lock, User, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
 
 export const LoginPage = ({ onSwitchToRegister }) => {
-  const { login } = useAuth();
+  const { login, loginDemo } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  const handleDemoLogin = async () => {
+    setDemoLoading(true);
+    setErrorMsg('');
+    try {
+      await loginDemo();
+    } catch (err) {
+      setErrorMsg('Failed to initialize demo evaluator session.');
+    } finally {
+      setDemoLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -123,7 +136,7 @@ export const LoginPage = ({ onSwitchToRegister }) => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || demoLoading}
             className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 mt-2"
           >
             {loading ? (
@@ -135,6 +148,34 @@ export const LoginPage = ({ onSwitchToRegister }) => {
             )}
           </button>
         </form>
+
+        {/* Instant Evaluator Quick Demo */}
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-800" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-slate-900 px-2 text-slate-500 font-mono text-[10px]">
+              Or Presentation / Viva Demo
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleDemoLogin}
+          disabled={loading || demoLoading}
+          className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-emerald-500/10 hover:from-emerald-500/20 hover:to-cyan-500/20 border border-emerald-500/30 text-emerald-300 font-semibold text-xs transition flex items-center justify-center gap-2 group shadow-sm"
+        >
+          {demoLoading ? (
+            <span className="w-4 h-4 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin" />
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span>Instant Evaluator Demo (One-Click)</span>
+            </>
+          )}
+        </button>
 
         <div className="mt-6 pt-5 border-t border-slate-800 text-center">
           <p className="text-xs text-slate-400">

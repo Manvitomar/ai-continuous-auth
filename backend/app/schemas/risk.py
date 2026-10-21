@@ -34,6 +34,7 @@ class SensitiveActionRequest(BaseModel):
     amount: Optional[float] = 0.0
     target: Optional[str] = None
     session_token: Optional[str] = None
+    threshold: Optional[float] = None
 
 class SensitiveActionResponse(BaseModel):
     success: bool
