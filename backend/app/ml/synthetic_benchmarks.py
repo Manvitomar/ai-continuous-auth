@@ -17,8 +17,8 @@ def generate_academic_benchmark_dataset(
     """
     rng = np.random.RandomState(random_seed)
     
-    means = np.array([baseline_summary[name]["mean"] for name in FEATURE_NAMES])
-    stds = np.array([baseline_summary[name]["std"] for name in FEATURE_NAMES])
+    means = np.array([baseline_summary.get(name, {}).get("mean", 0.0) for name in FEATURE_NAMES])
+    stds = np.array([baseline_summary.get(name, {}).get("std", 1.0) for name in FEATURE_NAMES])
     
     # Ensure reasonable variation floor for features with low training variance
     stds = np.where(stds < 1e-2, 0.05 * np.maximum(means, 1.0), stds)
@@ -32,6 +32,9 @@ def generate_academic_benchmark_dataset(
         sample[curv_idx] = max(1.0, sample[curv_idx])
         pause_idx = FEATURE_NAMES.index("pause_ratio")
         sample[pause_idx] = min(0.95, max(0.01, sample[pause_idx]))
+        if "keystroke_overlap_ratio" in FEATURE_NAMES:
+            ov_idx = FEATURE_NAMES.index("keystroke_overlap_ratio")
+            sample[ov_idx] = min(1.0, max(0.0, sample[ov_idx]))
         genuine_samples.append(sample)
 
     # 2. Impostor samples (Ground truth = 1, Anomaly)
@@ -48,6 +51,10 @@ def generate_academic_benchmark_dataset(
         sample[FEATURE_NAMES.index("typing_speed_cpm")] = 920.0 # Bot: 920 CPM
         sample[FEATURE_NAMES.index("curvature_ratio")] = 1.001  # Bot: perfectly straight mouse vector
         sample[FEATURE_NAMES.index("mean_jerk")] = 0.05
+        if "keystroke_overlap_ratio" in FEATURE_NAMES:
+            sample[FEATURE_NAMES.index("keystroke_overlap_ratio")] = 0.0
+        if "flight_time_cv" in FEATURE_NAMES:
+            sample[FEATURE_NAMES.index("flight_time_cv")] = 0.02
         impostor_samples.append(sample)
         impostor_labels.append("SYNTHETIC_BOT_INJECTION")
 
@@ -60,6 +67,10 @@ def generate_academic_benchmark_dataset(
         sample[FEATURE_NAMES.index("mean_velocity")] = max(0.1, means[FEATURE_NAMES.index("mean_velocity")] * 0.35)
         sample[FEATURE_NAMES.index("curvature_ratio")] = means[FEATURE_NAMES.index("curvature_ratio")] * 2.2
         sample[FEATURE_NAMES.index("pause_ratio")] = min(0.9, means[FEATURE_NAMES.index("pause_ratio")] * 2.5 + 0.2)
+        if "keystroke_overlap_ratio" in FEATURE_NAMES:
+            sample[FEATURE_NAMES.index("keystroke_overlap_ratio")] = 0.0
+        if "flight_time_cv" in FEATURE_NAMES:
+            sample[FEATURE_NAMES.index("flight_time_cv")] = 0.72
         impostor_samples.append(sample)
         impostor_labels.append("SYNTHETIC_HUNT_AND_PECK_USER")
 
@@ -71,6 +82,10 @@ def generate_academic_benchmark_dataset(
         sample[FEATURE_NAMES.index("max_velocity")] = means[FEATURE_NAMES.index("max_velocity")] * 3.2
         sample[FEATURE_NAMES.index("curvature_ratio")] = 3.8
         sample[FEATURE_NAMES.index("std_flight_time")] = means[FEATURE_NAMES.index("std_flight_time")] * 4.0
+        if "keystroke_overlap_ratio" in FEATURE_NAMES:
+            sample[FEATURE_NAMES.index("keystroke_overlap_ratio")] = 0.12
+        if "flight_time_cv" in FEATURE_NAMES:
+            sample[FEATURE_NAMES.index("flight_time_cv")] = 0.58
         impostor_samples.append(sample)
         impostor_labels.append("SYNTHETIC_ERRATIC_JITTER_IMPOSTOR")
 

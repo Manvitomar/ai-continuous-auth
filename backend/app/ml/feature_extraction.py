@@ -74,6 +74,16 @@ FEATURE_METADATA = {
         "label": "Scroll Dynamics",
         "unit": "px/s",
         "desc": "Intensity and frequency of scrolling displacement."
+    },
+    "keystroke_overlap_ratio": {
+        "label": "Key Overlap (Roll Typing)",
+        "unit": "ratio",
+        "desc": "Degree to which consecutive keys overlap in down-state. Discriminates touch-typists from hunt-and-peck."
+    },
+    "flight_time_cv": {
+        "label": "Cadence Uniformity (CV)",
+        "unit": "ratio",
+        "desc": "Coefficient of variation in key transitions. Detects hesitations and foreign typing patterns."
     }
 }
 

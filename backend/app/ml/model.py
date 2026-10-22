@@ -75,25 +75,63 @@ def load_user_model(
 def raw_score_to_risk_score(raw_decision_score: float) -> float:
     """
     Convert raw Isolation Forest decision_function output to a calibrated 0-100 Risk Score.
-    
-    Decision Function Output Profile:
-    - Highly typical normal behavior: +0.15 to +0.35 -> Risk: 5% to 25%
-    - Normal borderline: +0.02 to +0.08 -> Risk: 35% to 55%
-    - Noticeable anomaly: -0.01 to -0.08 -> Risk: 65% to 85%
-    - Severe deviation/attack: < -0.15 -> Risk: 90% to 99%
     """
     s = float(raw_decision_score)
     # Calibrated sigmoid parameters
-    boundary_offset = 0.035
-    steepness = 16.0
+    boundary_offset = 0.04
+    steepness = 18.0
     
     exponent = -steepness * (s - boundary_offset)
-    # Clamp exponent to avoid float overflow
     exponent = max(-30.0, min(30.0, exponent))
     
     prob_anomaly = 1.0 / (1.0 + math.exp(-exponent))
     risk_score = round(float(prob_anomaly * 100.0), 2)
     return min(100.0, max(0.0, risk_score))
+
+def compute_statistical_z_risk(
+    feature_vector: np.ndarray,
+    baseline_summary: Optional[Dict[str, Any]]
+) -> float:
+    """
+    Compute multi-feature standardized statistical divergence (Mahalanobis-inspired Z-distance).
+    Directly detects behavioral changes (e.g., someone else using the keyboard/trackpad)
+    even when individual tree partitions are broad.
+    """
+    if not baseline_summary:
+        return 10.0
+
+    from app.ml.feature_extraction import FEATURE_NAMES
+    z_scores = []
+    for i, name in enumerate(FEATURE_NAMES):
+        if i >= len(feature_vector) or name not in baseline_summary:
+            continue
+        stats = baseline_summary[name]
+        mean = stats.get("mean", 0.0)
+        std = stats.get("std", 1.0)
+        # Safe std avoids division by zero for features with very low training variance
+        safe_std = max(std, 0.08 * max(abs(mean), 1.0))
+        val = float(feature_vector[i])
+        z = abs(val - mean) / safe_std
+        z_scores.append(z)
+
+    if not z_scores:
+        return 10.0
+
+    z_arr = np.array(z_scores)
+    # Focus on top 3 most anomalous feature divergences
+    top_z = np.sort(z_arr)[::-1][:3]
+    avg_top_z = float(np.mean(top_z))
+
+    # Sigmoid calibration:
+    # avg_top_z <= 1.2 -> Genuine normal human variance (~10% - 20%)
+    # avg_top_z = 2.0 -> Noticeable deviation (~55%)
+    # avg_top_z >= 2.8 -> Distinct other person / strong anomaly (~85% - 98%)
+    k = 2.4
+    z_center = 1.90
+    exponent = -k * (avg_top_z - z_center)
+    exponent = max(-30.0, min(30.0, exponent))
+    dist_risk = 100.0 / (1.0 + math.exp(exponent))
+    return float(round(dist_risk, 2))
 
 def predict_biometric_risk(
     user_id: int,
@@ -102,18 +140,35 @@ def predict_biometric_risk(
     baseline_summary: Optional[Dict[str, Any]] = None
 ) -> Tuple[float, float, str, IsolationForest, RobustScaler]:
     """
-    Execute real model inference and return:
+    Execute hybrid ensemble inference (Isolation Forest + Statistical Z-Distance) and return:
     (risk_score, raw_anomaly_score, risk_status, model, scaler)
     """
     model, scaler, _ = load_user_model(user_id, version, baseline_summary)
     
-    # 2D reshape for single sample inference
-    sample_2d = feature_vector.reshape(1, -1)
-    scaled_sample = scaler.transform(sample_2d)
+    # Ensure feature dimensions match model training dimensions for bidirectional backward compatibility
+    n_expected = scaler.n_features_in_
+    if feature_vector.shape[0] > n_expected:
+        sample_for_model = feature_vector[:n_expected].reshape(1, -1)
+    elif feature_vector.shape[0] < n_expected:
+        defaults = np.array([0.35, 0.22], dtype=np.float64)
+        padding = defaults[:(n_expected - feature_vector.shape[0])]
+        sample_for_model = np.concatenate([feature_vector, padding]).reshape(1, -1)
+    else:
+        sample_for_model = feature_vector.reshape(1, -1)
 
-    # Real Isolation Forest inference
+    scaled_sample = scaler.transform(sample_for_model)
+
+    # 1. Real Isolation Forest inference
     raw_decision = float(model.decision_function(scaled_sample)[0])
-    risk_score = raw_score_to_risk_score(raw_decision)
+    iso_risk = raw_score_to_risk_score(raw_decision)
+
+    # 2. Parametric Statistical Z-Distance inference
+    dist_risk = compute_statistical_z_risk(feature_vector, baseline_summary)
+
+    # 3. Hybrid Ensemble:
+    # If either the tree partition depth OR the statistical distribution detects an impostor,
+    # the risk score reflects the high-confidence threat signal
+    risk_score = round(max(iso_risk, dist_risk * 0.95), 2)
 
     if risk_score <= 40.0:
         status = "LOW"

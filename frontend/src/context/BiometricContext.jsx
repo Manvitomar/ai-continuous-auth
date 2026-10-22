@@ -42,10 +42,10 @@ export const BiometricProvider = ({ children }) => {
         .then(res => setHistory(res.data))
         .catch(() => {});
 
-      // Set up periodic continuous telemetry evaluation (every 6 seconds)
+      // Set up periodic continuous telemetry evaluation (every 4 seconds)
       intervalRef.current = setInterval(() => {
         sendTelemetryWindow();
-      }, 6000);
+      }, 4000);
     } else {
       if (extractorRef.current) {
         extractorRef.current.stopListening();
@@ -71,6 +71,10 @@ export const BiometricProvider = ({ children }) => {
       features = generateSimulationFeatures(activeSimulation);
     } else {
       features = extractorRef.current.extractFeatureVector();
+      // Only send real interactions; skip idle windows to avoid cooling down an active threat
+      if (!features._hasSufficientData) {
+        return;
+      }
     }
 
     try {
@@ -121,6 +125,8 @@ export const BiometricProvider = ({ children }) => {
         std_flight_time: 0.5,
         typing_speed_cpm: 920.0,
         pause_ratio: 0.01,
+        keystroke_overlap_ratio: 0.0,
+        flight_time_cv: 0.02,
         mean_velocity: 8.5,
         max_velocity: 25.0,
         mean_acceleration: 1.2,
@@ -138,6 +144,8 @@ export const BiometricProvider = ({ children }) => {
         std_flight_time: 120.0,
         typing_speed_cpm: 65.0,
         pause_ratio: 0.65,
+        keystroke_overlap_ratio: 0.0,
+        flight_time_cv: 0.65,
         mean_velocity: 0.25,
         max_velocity: 0.8,
         mean_acceleration: 0.01,
@@ -155,6 +163,8 @@ export const BiometricProvider = ({ children }) => {
         std_flight_time: 85.0,
         typing_speed_cpm: 180.0,
         pause_ratio: 0.25,
+        keystroke_overlap_ratio: 0.15,
+        flight_time_cv: 0.45,
         mean_velocity: 1.8,
         max_velocity: 7.2,
         mean_acceleration: 0.25,

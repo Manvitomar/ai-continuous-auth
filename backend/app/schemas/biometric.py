@@ -26,6 +26,10 @@ class BiometricFeatureVector(BaseModel):
     movement_to_click_ratio: float = Field(..., ge=0.0, description="Mouse moves per click event")
     scroll_intensity: float = Field(..., ge=0.0, description="Scroll delta pixels per second")
 
+    # High-discriminant biometric enhancements
+    keystroke_overlap_ratio: Optional[float] = Field(0.35, ge=0.0, le=1.0, description="Ratio of overlapped consecutive key presses")
+    flight_time_cv: Optional[float] = Field(0.22, ge=0.0, description="Coefficient of variation in flight time")
+
     def to_vector(self) -> List[float]:
         """Convert features to an ordered numerical vector for ML model inference."""
         return [
@@ -42,7 +46,9 @@ class BiometricFeatureVector(BaseModel):
             self.curvature_ratio,
             self.mean_click_duration,
             self.movement_to_click_ratio,
-            self.scroll_intensity
+            self.scroll_intensity,
+            self.keystroke_overlap_ratio if self.keystroke_overlap_ratio is not None else 0.35,
+            self.flight_time_cv if self.flight_time_cv is not None else 0.22
         ]
 
     @classmethod
@@ -61,7 +67,9 @@ class BiometricFeatureVector(BaseModel):
             "curvature_ratio",
             "mean_click_duration",
             "movement_to_click_ratio",
-            "scroll_intensity"
+            "scroll_intensity",
+            "keystroke_overlap_ratio",
+            "flight_time_cv"
         ]
 
 class EnrollmentSubmission(BaseModel):

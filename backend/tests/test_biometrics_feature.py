@@ -22,7 +22,7 @@ def test_feature_vector_zero_content_guarantee():
     }
     vec = BiometricFeatureVector(**valid_data)
     arr = validate_and_sanitize_features(vec)
-    assert len(arr) == 14
+    assert len(arr) == 16
     assert arr[0] == 95.4
 
     # Enforce non-negative validation

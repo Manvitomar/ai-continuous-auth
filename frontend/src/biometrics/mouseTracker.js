@@ -1,8 +1,8 @@
 /**
  * Privacy-Preserving Mouse Kinematics Tracker
  * 
- * Captures kinematic velocities, acceleration, jerk, curvature,
- * click hold duration, and scroll intensity.
+ * Captures kinematic velocities, acceleration, jerk, trajectory curvature,
+ * turning angle dynamics, and click depression duration.
  */
 
 export class MouseTracker {
@@ -14,6 +14,19 @@ export class MouseTracker {
     this.clickCount = 0;
     this.totalScrollDelta = 0;
     this.windowStartTime = performance.now();
+
+    this.lastValidMetrics = {
+      mean_velocity: 0.85,
+      max_velocity: 2.5,
+      mean_acceleration: 0.045,
+      mean_jerk: 0.012,
+      curvature_ratio: 1.25,
+      mean_click_duration: 85.0,
+      movement_to_click_ratio: 8.0,
+      scroll_intensity: 0.0,
+      total_moves: 0,
+      hasSufficientData: false
+    };
   }
 
   handleMouseMove = (event) => {
@@ -21,7 +34,6 @@ export class MouseTracker {
     this.points.push({ x: event.clientX, y: event.clientY, t: now });
     this.moveCount++;
 
-    // Limit buffer to prevent memory growth
     if (this.points.length > 300) {
       this.points.shift();
     }
@@ -65,6 +77,16 @@ export class MouseTracker {
     this.clickCount = 0;
     this.totalScrollDelta = 0;
     this.windowStartTime = now;
+
+    const hasSufficientData = pts.length >= 6 || clicks.length >= 1;
+
+    if (!hasSufficientData) {
+      return {
+        ...this.lastValidMetrics,
+        total_moves: 0,
+        hasSufficientData: false
+      };
+    }
 
     // Kinematic calculations
     const velocities = [];
@@ -110,28 +132,28 @@ export class MouseTracker {
 
     const meanVelocity = velocities.length
       ? velocities.reduce((a, b) => a + b, 0) / velocities.length
-      : 0.85;
+      : this.lastValidMetrics.mean_velocity;
 
     const maxVelocity = velocities.length
       ? Math.max(...velocities)
-      : 2.2;
+      : this.lastValidMetrics.max_velocity;
 
     const meanAcceleration = accelerations.length
       ? accelerations.reduce((a, b) => a + b, 0) / accelerations.length
-      : 0.045;
+      : this.lastValidMetrics.mean_acceleration;
 
     const meanJerk = jerks.length
       ? jerks.reduce((a, b) => a + b, 0) / jerks.length
-      : 0.012;
+      : this.lastValidMetrics.mean_jerk;
 
     const meanClickDuration = clicks.length
       ? clicks.reduce((a, b) => a + b, 0) / clicks.length
-      : 85.0;
+      : this.lastValidMetrics.mean_click_duration;
 
     const movementToClickRatio = clickEvents > 0 ? moves / clickEvents : Math.max(1.0, moves);
     const scrollIntensity = scrollDelta / durationSeconds;
 
-    return {
+    const metrics = {
       mean_velocity: Math.round(meanVelocity * 1000) / 1000,
       max_velocity: Math.round(maxVelocity * 1000) / 1000,
       mean_acceleration: Math.round(meanAcceleration * 10000) / 10000,
@@ -140,7 +162,11 @@ export class MouseTracker {
       mean_click_duration: Math.round(meanClickDuration * 10) / 10,
       movement_to_click_ratio: Math.round(movementToClickRatio * 10) / 10,
       scroll_intensity: Math.round(scrollIntensity * 10) / 10,
-      total_moves: moves
+      total_moves: moves,
+      hasSufficientData: true
     };
+
+    this.lastValidMetrics = metrics;
+    return metrics;
   }
 }

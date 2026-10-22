@@ -34,6 +34,10 @@ export class FeatureExtractor {
     window.removeEventListener('wheel', this.mouseTracker.handleWheel);
   }
 
+  hasRecentActivity() {
+    return (this.keyboardTracker.keyPressCount >= 2) || (this.mouseTracker.points.length >= 5) || (this.mouseTracker.clickCount >= 1);
+  }
+
   extractFeatureVector() {
     const kMetrics = this.keyboardTracker.getMetricsAndReset();
     const mMetrics = this.mouseTracker.getMetricsAndReset();
@@ -46,6 +50,8 @@ export class FeatureExtractor {
       std_flight_time: kMetrics.std_flight_time,
       typing_speed_cpm: kMetrics.typing_speed_cpm,
       pause_ratio: kMetrics.pause_ratio,
+      keystroke_overlap_ratio: kMetrics.keystroke_overlap_ratio ?? 0.35,
+      flight_time_cv: kMetrics.flight_time_cv ?? 0.22,
 
       mean_velocity: mMetrics.mean_velocity,
       max_velocity: mMetrics.max_velocity,
@@ -55,7 +61,10 @@ export class FeatureExtractor {
       mean_click_duration: mMetrics.mean_click_duration,
 
       movement_to_click_ratio: mMetrics.movement_to_click_ratio,
-      scroll_intensity: mMetrics.scroll_intensity
+      scroll_intensity: mMetrics.scroll_intensity,
+
+      // Activity flag for the client evaluator
+      _hasSufficientData: kMetrics.hasSufficientData || mMetrics.hasSufficientData
     };
   }
 }
